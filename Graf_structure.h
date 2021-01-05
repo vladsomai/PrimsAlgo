@@ -10,8 +10,7 @@ namespace structure_graf
 
 	private:
 		list<shared_ptr<Node>> NoduriGraf;//lista care v-a retine adresele fiecarui nod din graf (fiecare nod este head - capul listei inlantuite)
-		queue< shared_ptr<Node> > que{};//queue pentru implementarea functiei de cautare prin cuprindere
-		list < shared_ptr<Node> > NodesSearchedInGraf{};//lista in care vom insera nodurile parcurse de BFS & DFS, dupa care o vom afisa in ordinea in care au fost inserate noduri.
+		list < shared_ptr<Node> > NodesSearchedInGraf{};//lista in care vom insera nodurile parcurse de PRIM.
 
 	public:
         //------------------------------------------------------------
@@ -300,29 +299,6 @@ namespace structure_graf
 	}
 
 
-	//verificam daca un nod exista in coada clasei graf
-	bool structure_graf::Graf::NodeExistsInQueue(shared_ptr<Node>& actual)
-	{
-		queue<shared_ptr<Node>> tempqueue = this->que;
-
-		while (!tempqueue.empty())
-		{
-
-			if (tempqueue.front()->getData() == actual->getData())
-			{
-
-				return true;
-			
-			}
-
-			tempqueue.pop();
-		}
-
-		return false;
-
-	}
-
-
 	//verificam daca un nod exista in lista rezultata din cautarea nodurilor 
 	bool  structure_graf::Graf::NodeExistsInNodesSearchedInGraf(shared_ptr<Node>& actual)
 	{
@@ -344,19 +320,6 @@ namespace structure_graf
 	}
 
 
-	//functie de afisare a numerelor gasita de functiile BFS si DFS
-	void  structure_graf::Graf::PrintNodesSearchedInGraf()
-	{
-
-		for (auto iterator = this->NodesSearchedInGraf.begin(); iterator != this->NodesSearchedInGraf.end(); ++iterator)
-		{
-
-			cout << iterator->get()->getData()<<"  ";
-
-		}
-
-	}
-	
 
 	//verificam daca un nod exista in lista
 	bool  structure_graf::Graf::NodeExistsInList(shared_ptr<Node>& actual , list<shared_ptr<Node>>& li)
@@ -540,35 +503,35 @@ namespace structure_graf
 	}
 
 
+
+	/*
+	  vom implementa algoritmul lui prim prin gasirea celui mai mic arc din graf(cu ponderea cea mai mica),
+	  dupa care adaugam numerele gasite prin ponderea cea mai mica intr-un tablou pe care il vom afisa la final.
+	  
+	  1.Adaugam cele doua noduri cu cel mai mic arc din graf in tabloul cu numere gasite.
+	  2.verificam ponderea arcelor nodurilor adaugate in tablou, dupa care adaugam nodul care area cea mai mica pondere.
+	*/
 	void structure_graf::Graf::PrimAlgo() 
 	{
 
-		size_t lowestWeight = SIZE_MAX;//dam o valoare maxima pentru a putea compara cu fiecare weight din graf
-		cout << lowestWeight;
+		list<shared_ptr<arc>> listOfArches;
 
-		//iteram in lista nodurilor grafului 
-		for (auto actual = NoduriGraf.begin(); actual != NoduriGraf.end(); ++actual)
+		for (auto actualNode = NoduriGraf.begin(); actualNode != NoduriGraf.end(); actualNode++)
 		{
+			cout << actualNode->get()->getData() << endl;
 
-			auto tempList = actual->get()->getNextArc();//creat a temp list of each node with all the next nodes
+			listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
 
-			for (auto actualWeight = tempList.begin(); actualWeight != tempList.end(); ++actualWeight)
+			for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
 			{
 
-				if (actualWeight->get()->getNextWeight() < lowestWeight)
-				{
+				cout << actualArch->get()->getNextNode()<<" w:";
+				cout << actualArch->get()->getNextWeight() << endl;
 
-					lowestWeight = actualWeight->get()->getNextWeight();
-
-				}
-
-
+				 
 			}
-
-			cout << endl;
-
+		
 		}
-
 	}
 
 }
