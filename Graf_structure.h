@@ -532,9 +532,6 @@ namespace structure_graf
 
 
 	/*
-	  vom implementa algoritmul lui prim prin gasirea celui mai mic arc din graf(cu ponderea cea mai mica),
-	  dupa care adaugam numerele gasite prin ponderea cea mai mica intr-un tablou pe care il vom afisa la final.
-	  
 	  1.Adaugam cele doua noduri cu cel mai mic arc din graf in tabloul cu numere gasite.
 	  2.verificam ponderea arcelor nodurilor adaugate in tablou, dupa care adaugam nodul care area cea mai mica pondere.
 	*/
@@ -544,24 +541,23 @@ namespace structure_graf
 		list<shared_ptr<arc>> listOfArches;//lista care va retine nodurile legate la un nod
 
 		size_t currentWeight=0;
-		size_t currentSmallestWeight=SIZE_MAX;
+		size_t currentSmallestWeight=SIZE_MAX;//initializam cel mai mic weight cu cel mai mare numar pe care il putem aloca  
 		size_t counter = 0;
 
-		queue<shared_ptr<Node>> que;//vom folosi un queue pentru a gasi nodurile care au cel mai mic arc intre ele
-
+		queue<shared_ptr<Node>> que;//vom folosi un queue pentru a gasi nodurile care au cel mai mic arc intre ele si vom pastra in acest queue doar cele doua noduri cu arc-ul cel mai mic la acel moment
+		
+									
+	   //iteram in lista de noduri ale grafului pentru a gasi un arc cu weightul cel mai mic
 		for (auto actualNode = NoduriGraf.begin(); actualNode != NoduriGraf.end(); actualNode++)
 		{
 
-			cout << actualNode->get()->getData() << endl;
-
 			listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
 			
+
+			//iteram in lista de noduri ale actualNode pentru a verifica care weight este cel mai mic,
+			//in momentul in care gasim un weight mai mic decat "currentSmallestWeight", vom seta "currentSmallestWeight" cu actualWeight
 			for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
 			{
-
-				cout << actualArch->get()->getNextNode()->getData()<<"    ";
-				cout << actualArch->get()->getNextNode()<<" w:";
-				cout << actualArch->get()->getNextWeight() << endl;
 
 				currentWeight = actualArch->get()->getNextWeight();
 
@@ -569,12 +565,14 @@ namespace structure_graf
 				{
 
 					currentSmallestWeight = currentWeight;
+					
+					//daca suntem la prima rulare nu vom face pop() deoarece nu avem nici un element in queue
 					if (counter == 0)
 					{
 
 						que.push(*actualNode);
 						que.push(actualArch->get()->getNextNode());
-						counter = 1;
+						counter++;
 					
 					}
 					else
@@ -587,12 +585,9 @@ namespace structure_graf
 
 					}
 					
-					
 				}
 
-				 
 			}
-			cout << endl;
 		
 		}
 
@@ -603,86 +598,75 @@ namespace structure_graf
 		que.pop();
 		
 		
-		PrintNodesSearchedInGraf();
-		cout << endl;
-
 		/// 
 		/// =====pana in acest pas am gasit cele doua noduri cu weight-ul cel mai mic din graf, putem incepe implementarea algoritmului=====
 		/// 
-		cout << "\n===========================================" << endl;
-		cout << "===============Pasul 2=====================" << endl;
-		cout << "===========================================\n" << endl;
-
-
-	
-
-		shared_ptr<Node> nextNode = nullptr;
-		counter = 0;
-		for (auto actualNode = NodesSearchedInGraf.begin(); actualNode != NodesSearchedInGraf.end(); actualNode++)
+		
+		//atat timp cat lista cu noduri parcurse nu are exact numarul elementelor din graf
+		while (NoduriGraf.size() != NodesSearchedInGraf.size())
 		{
 
-			cout << actualNode->get()->getData() << endl;
+			//reinitializam cel mai mic weight cu cel mai mare numar pe care il putem aloca  
+			currentSmallestWeight = SIZE_MAX;
 
-			listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
+			shared_ptr<Node> nextNode = nullptr;
+			counter = 0;//reset counter
 
-			for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
+			//iteram in lista de noduri parcurse pentru a gasi un nou nod cu weightul cel mai mic
+			for (auto actualNode = NodesSearchedInGraf.begin(); actualNode != NodesSearchedInGraf.end(); actualNode++)
 			{
-				nextNode = actualArch->get()->getNextNode();
-				if (NodeExistsInList( nextNode, NodesSearchedInGraf) )
-				{
-					continue;
-				}
 
-				cout << actualArch->get()->getNextNode()->getData() << "    ";
-				cout << actualArch->get()->getNextNode() << " w:";
-				cout << actualArch->get()->getNextWeight() << endl;
+				listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
 
-				currentWeight = actualArch->get()->getNextWeight();
-
-				if (currentWeight < currentSmallestWeight)
+				//iteram in lista de noduri legate la actualNode
+				for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
 				{
 
-					currentSmallestWeight = currentWeight;
-					if (counter == 0)
+					nextNode = actualArch->get()->getNextNode();
+
+					//verificam daca nodul urmator exista deja in lista cu noduri parcurse, daca exista vom trece la urmatorul nod
+					if (NodeExistsInList(nextNode, NodesSearchedInGraf))
 					{
 
-						que.push(*actualNode);
-						que.push(actualArch->get()->getNextNode());
-						counter = 1;
-
+						continue;
+					
 					}
-					else
+
+					currentWeight = actualArch->get()->getNextWeight();
+
+					if (currentWeight < currentSmallestWeight)
 					{
 
-						que.push(*actualNode);
-						que.push(actualArch->get()->getNextNode());
-						que.pop();
-						que.pop();
+						currentSmallestWeight = currentWeight;
+						if (counter == 0)
+						{
+
+							que.push(actualArch->get()->getNextNode());
+							counter++;
+
+						}
+						else
+						{
+
+							que.push(actualArch->get()->getNextNode());
+							que.pop();
+
+						}
 
 					}
-
 
 				}
-
-
+	
 			}
-			cout << endl;
+
+			NodesSearchedInGraf.push_back(que.front());//elementul ramas in queue va fi adaugat in lista nodurilor parcurse deoarece acel element din queue are weight-ul cel mai mic
+			que.pop();//eliberam queue pentru a fi folosit in urmatorul ciclu
 
 		}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+		cout << "Prim's algorithm returned the following minimum spanning tree: " << endl;
+		PrintNodesSearchedInGraf();
+		cout << endl;
 
 	}
 
