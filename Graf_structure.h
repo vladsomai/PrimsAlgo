@@ -23,13 +23,13 @@ namespace structure_graf
 		void PrimAlgo();
 
 
-		bool NodeExistsInQueue(shared_ptr<Node>&);
 		bool NodeExistsInNodesSearchedInGraf(shared_ptr<Node>&);
 		bool NodeExistsInList(shared_ptr<Node>&, list < shared_ptr<Node>>&);
 
 		void PrintStructure();
 		void afisareNoduriGraf();
 		void PrintNodesSearchedInGraf();
+		void PrintQueue(queue <shared_ptr<Node>>&);
 
 		size_t sizeof_NoduriGraf() { return NoduriGraf.size(); }
 
@@ -53,6 +53,33 @@ namespace structure_graf
 		~Graf() = default;
 
 	};
+
+	//functie de afisare a numerelor gasita de Prim
+	void  structure_graf::Graf::PrintNodesSearchedInGraf()
+	{
+
+		for (auto iterator = this->NodesSearchedInGraf.begin(); iterator != this->NodesSearchedInGraf.end(); ++iterator)
+		{
+
+			cout << iterator->get()->getData() << "  ";
+
+		}
+
+	}
+
+	//verificam daca un nod exista in coada clasei graf
+	void structure_graf::Graf::PrintQueue(queue <shared_ptr<Node>>& actualQueue)
+	{
+		queue<shared_ptr<Node>> temp = actualQueue;
+
+		while (!temp.empty())
+		{
+			std::cout << temp.front()->getData()<< " ";
+			temp.pop();
+		}
+		std::cout << std::endl;
+
+	}
 
 	//functia de verificare graf vid
 	bool Graf::GrafVid()
@@ -514,24 +541,149 @@ namespace structure_graf
 	void structure_graf::Graf::PrimAlgo() 
 	{
 
-		list<shared_ptr<arc>> listOfArches;
+		list<shared_ptr<arc>> listOfArches;//lista care va retine nodurile legate la un nod
+
+		size_t currentWeight=0;
+		size_t currentSmallestWeight=SIZE_MAX;
+		size_t counter = 0;
+
+		queue<shared_ptr<Node>> que;//vom folosi un queue pentru a gasi nodurile care au cel mai mic arc intre ele
 
 		for (auto actualNode = NoduriGraf.begin(); actualNode != NoduriGraf.end(); actualNode++)
 		{
+
+			cout << actualNode->get()->getData() << endl;
+
+			listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
+			
+			for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
+			{
+
+				cout << actualArch->get()->getNextNode()->getData()<<"    ";
+				cout << actualArch->get()->getNextNode()<<" w:";
+				cout << actualArch->get()->getNextWeight() << endl;
+
+				currentWeight = actualArch->get()->getNextWeight();
+
+				if (currentWeight < currentSmallestWeight)
+				{
+
+					currentSmallestWeight = currentWeight;
+					if (counter == 0)
+					{
+
+						que.push(*actualNode);
+						que.push(actualArch->get()->getNextNode());
+						counter = 1;
+					
+					}
+					else
+					{
+
+						que.push(*actualNode);
+						que.push(actualArch->get()->getNextNode());
+						que.pop();
+						que.pop();
+
+					}
+					
+					
+				}
+
+				 
+			}
+			cout << endl;
+		
+		}
+
+		//punem primul elelment din queue in lista de noduri parcursa dupa care dam pop si punem al doilea element in lista.
+		NodesSearchedInGraf.push_back(que.front());
+		que.pop();
+		NodesSearchedInGraf.push_back(que.front());
+		que.pop();
+		
+		
+		PrintNodesSearchedInGraf();
+		cout << endl;
+
+		/// 
+		/// =====pana in acest pas am gasit cele doua noduri cu weight-ul cel mai mic din graf, putem incepe implementarea algoritmului=====
+		/// 
+		cout << "\n===========================================" << endl;
+		cout << "===============Pasul 2=====================" << endl;
+		cout << "===========================================\n" << endl;
+
+
+	
+
+		shared_ptr<Node> nextNode = nullptr;
+		counter = 0;
+		for (auto actualNode = NodesSearchedInGraf.begin(); actualNode != NodesSearchedInGraf.end(); actualNode++)
+		{
+
 			cout << actualNode->get()->getData() << endl;
 
 			listOfArches = actualNode->get()->getNextArc();//lista de noduri catre care avem arc din actualNode
 
 			for (auto actualArch = listOfArches.begin(); actualArch != listOfArches.end(); actualArch++)
 			{
+				nextNode = actualArch->get()->getNextNode();
+				if (NodeExistsInList( nextNode, NodesSearchedInGraf) )
+				{
+					continue;
+				}
 
-				cout << actualArch->get()->getNextNode()<<" w:";
+				cout << actualArch->get()->getNextNode()->getData() << "    ";
+				cout << actualArch->get()->getNextNode() << " w:";
 				cout << actualArch->get()->getNextWeight() << endl;
 
-				 
+				currentWeight = actualArch->get()->getNextWeight();
+
+				if (currentWeight < currentSmallestWeight)
+				{
+
+					currentSmallestWeight = currentWeight;
+					if (counter == 0)
+					{
+
+						que.push(*actualNode);
+						que.push(actualArch->get()->getNextNode());
+						counter = 1;
+
+					}
+					else
+					{
+
+						que.push(*actualNode);
+						que.push(actualArch->get()->getNextNode());
+						que.pop();
+						que.pop();
+
+					}
+
+
+				}
+
+
 			}
-		
+			cout << endl;
+
 		}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	}
 
 }
