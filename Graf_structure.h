@@ -570,6 +570,7 @@ namespace structure_graf
 					if (counter == 0)
 					{
 
+						//adaugam primul si al doilea nod intr-un queue, acest queue retine nodurile cu arcul cel mai mic din graf.
 						que.push(*actualNode);
 						que.push(actualArch->get()->getNextNode());
 						counter++;
@@ -578,6 +579,8 @@ namespace structure_graf
 					else
 					{
 
+						//in cazul in care am gasit alte doua noduri cu un arc mai mic decat cel existent deja in queue, le adaugam pe cele noi si stergem cele doua noduri care erau existente in queue
+						//astfel in fiecare iteratie in cazul in care am gasit un weight mai mic, vom avea cele doua noduri cu weight-ul cel mai mic in queue.
 						que.push(*actualNode);
 						que.push(actualArch->get()->getNextNode());
 						que.pop();
@@ -591,7 +594,8 @@ namespace structure_graf
 		
 		}
 
-		//punem primul elelment din queue in lista de noduri parcursa dupa care dam pop si punem al doilea element in lista.
+		//in acest pas deja avem in queue cele doua nodrui cu cel mai mic path gasit din graf, le adaugam in lista de noduri parcurse si le stergem din queue.
+		//punem primul si al doilea elelment din queue in lista de noduri parcursa dupa care stergem elementele.
 		NodesSearchedInGraf.push_back(que.front());
 		que.pop();
 		NodesSearchedInGraf.push_back(que.front());
@@ -599,7 +603,10 @@ namespace structure_graf
 		
 		
 		/// 
-		/// =====pana in acest pas am gasit cele doua noduri cu weight-ul cel mai mic din graf, putem incepe implementarea algoritmului=====
+		/// =====pana in acest pas am gasit cele doua noduri cu weight-ul cel mai mic din graf=====
+		/// pasul doi consta in iterarea listei cu noduri deja parcurse, atata timp cat numarul nodurilor din graf nu este egal cu numarul nodurilor deja parcurse
+		/// in fiecare iteratie verificam care este cel mai mic weight la un nod care nu se afla in lista deja parcursa, dupa ce am verificat toate nodurile ramanem cu weightul cel mai mic
+		/// adaugam nodul in lista parcursa si reincepem loop-ul.
 		/// 
 		
 		//atat timp cat lista cu noduri parcurse nu are exact numarul elementelor din graf
